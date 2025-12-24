@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Christmas Surprise</title>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <style>
+    :root{
+      --bgTop:#050716;
+      --bgMid:#0a0f2b;
+      --bgBot:#0b1020;
+
+      --pink:#ff5aa5;
+      --pink2:#ff89c2;
+
+      --lav1: rgba(190, 160, 255, .70);
+      --lav2: rgba(230, 205, 255, .58);
+      --lav3: rgba(165, 125, 255, .35);
+
+      --ground1:#0b0b12;
+      --ground2:#12122a;
+
+      --paperA:#fff7ea;
+      --paperB:#ffe7f1;
+      --ink:#1a1a1a;
+      --holly:#2fbf71;
+      --berry:#ff3b6a;
+      --gold:#ffd66b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0}
+    body{
+      overflow:hidden;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1100px 700px at 50% 18%, var(--bgMid) 0%, var(--bgTop) 40%, var(--bgBot) 100%);
+      color:#fff;
+    }
+
+    /* ===== Scene ===== */
+    .stage{
+      position:relative;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+    }
+
+    .camera{
+      position:absolute;
+      inset:0;
+      transform-origin: 50% 45%;
+      will-change: transform;
+    }
+
+    /* Stars */
+    .stars{
+      position:absolute; inset:0;
+      background-image:
+        radial-gradient(circle at 12% 20%, rgba(255,255,255,.9) 0 1px, transparent 2px),
+        radial-gradient(circle at 28% 12%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+        radial-gradient(circle at 45% 28%, rgba(255,255,255,.8) 0 1px, transparent 2px),
+        radial-gradient(circle at 66% 16%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+        radial-gradient(circle at 82% 25%, rgba(255,255,255,.9) 0 1px, transparent 2px),
+        radial-gradient(circle at 18% 45%, rgba(255,255,255,.6) 0 1px, transparent 2px),
+        radial-gradient(circle at 55% 52%, rgba(255,255,255,.7) 0 1px, transparent 2px),
+        radial-gradient(circle at 75% 44%, rgba(255,255,255,.6) 0 1px, transparent 2px);
+      background-size: 240px 240px, 300px 300px, 280px 280px, 330px 330px, 260px 260px, 360px 360px, 420px 420px, 500px 500px;
+      opacity:.55;
+      animation: twinkle 6s ease-in-out infinite alternate;
+      pointer-events:none;
+    }
+    @keyframes twinkle{ from{opacity:.35} to{opacity:.65} }
+
+    /* Lavender clouds */
+    .clouds{
+      position:absolute;
+      inset:-25% -15%;
+      z-index:2;
+      pointer-events:none;
+      opacity:0;
+    }
+    .cloud{
+      position:absolute;
+      width:min(560px, 80vw);
+      height:240px;
+      border-radius: 999px;
+      filter: blur(18px);
+      background:
+        radial-gradient(closest-side, var(--lav1), transparent 70%),
+        radial-gradient(closest-side, var(--lav2), transparent 70%),
+        radial-gradient(closest-side, var(--lav3), transparent 70%);
+      opacity:.95;
+      mix-blend-mode: screen;
+    }
+
+    /* Ground */
+    .ground{
+      position:absolute;
+      left:0; right:0;
+      bottom:-8%;
+      height:55%;
+      z-index:1;
+      pointer-events:none;
+      opacity:0;
+    }
+    .horizon-glow{
+      position:absolute;
+      left:50%;
+      top:0;
+      transform: translateX(-50%);
+      width: 120%;
+      height: 150px;
+      background: radial-gradient(closest-side, rgba(255,90,165,.22), transparent 70%);
+      filter: blur(6px);
+    }
+    .ground-plane{
+      position:absolute;
+      left:50%;
+      bottom:-2%;
+      transform: translateX(-50%) perspective(900px) rotateX(62deg);
+      width:min(980px, 94vw);
+      height:560px;
+      border-radius: 28px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.08), transparent 18%),
+        linear-gradient(180deg, var(--ground2), var(--ground1));
+      box-shadow: 0 -30px 90px rgba(0,0,0,.5) inset;
+    }
+
+    /* ===== Present ===== */
+    .present-area{
+      position:absolute;
+      left:50%;
+      top:56%;
+      transform: translate(-50%, -50%);
+      width: 220px;
+      height: 220px;
+      z-index:5;
+      cursor:pointer;
+      user-select:none;
+      touch-action:manipulation;
+      pointer-events:none; /* enabled later */
+      outline:none;
+    }
+    .present-area:focus-visible{
+      outline: 3px solid rgba(255,255,255,.8);
+      outline-offset: 10px;
+      border-radius: 22px;
+    }
+
+    .present-shadow{
+      position:absolute;
+      left:50%;
+      bottom:18px;
+      width: 220px;
+      height: 34px;
+      transform: translateX(-50%);
+      background: radial-gradient(closest-side, rgba(0,0,0,.55), transparent 70%);
+      filter: blur(1px);
+      opacity:.65;
+    }
+    .lid, .box{
+      position:absolute;
+      left:50%;
+      transform: translateX(-50%);
+      border-radius: 18px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
+    }
+    .lid{
+      top: 22px;
+      width: 220px;
+      height: 76px;
+      background: linear-gradient(180deg, var(--pink2), var(--pink));
+      transform-origin: 28px 72px;
+      z-index:4;
+    }
+    .box{
+      top: 88px;
+      width: 200px;
+      height: 132px;
+      background: linear-gradient(180deg, var(--pink), #ff3f98);
+      z-index:2;
+    }
+    .ribbon-vert{
+      position:absolute;
+      left:50%;
+      top: 88px;
+      width: 24px;
+      height: 132px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.85));
+      z-index:3;
+      border-radius: 10px;
+      opacity:.95;
+    }
+    .ribbon-horz{
+      position:absolute;
+      left:50%;
+      top: 126px;
+      width: 200px;
+      height: 24px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.85));
+      z-index:3;
+      border-radius: 10px;
+      opacity:.95;
+    }
+    .bow{
+      position:absolute;
+      left:50%;
+      top: 8px;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 54px;
+      z-index:5;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.25));
+    }
+    .bow:before, .bow:after{
+      content:"";
+      position:absolute;
+      top: 12px;
+      width: 36px;
+      height: 26px;
+      background: rgba(255,255,255,.97);
+      border-radius: 12px 18px 18px 12px;
+    }
+    .bow:before{ left: 6px; transform: rotate(-18deg); }
+    .bow:after{ right: 6px; transform: rotate(18deg) scaleX(-1); }
+    .knot{
+      position:absolute;
+      left:50%;
+      top: 18px;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 18px;
+      background: rgba(255,255,255,.99);
+      border-radius: 6px;
+    }
+
+    /* Pink light beam */
+    .beam{
+      position:absolute;
+      left:50%;
+      top: 74px;
+      transform: translateX(-50%);
+      width: 160px;
+      height: 240px;
+      background: radial-gradient(closest-side, rgba(255,90,165,.55), transparent 70%);
+      filter: blur(2px);
+      opacity:0;
+      pointer-events:none;
+      z-index:6;
+      clip-path: polygon(50% 0%, 88% 100%, 12% 100%);
+    }
+
+    /* Prompt */
+    .prompt{
+      position:absolute;
+      left:50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      font-weight:900;
+      letter-spacing:.3px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 14px 40px rgba(0,0,0,.25);
+      opacity:0;
+      z-index:8;
+      pointer-events:none;
+      text-align:center;
+      font-size: 13px;
+    }
+
+    /* ===== Hovering card (not fullscreen) ===== */
+    .card-float{
+      position:absolute;
+      left:50%;
+      top:42%;
+      transform: translate(-50%, -50%);
+      width: min(920px, 92vw);
+      height: min(520px, 70vh);
+      perspective: 1600px;
+
+      opacity:0;
+      pointer-events:none;
+      z-index:10;
+    }
+
+    .card-book{
+      width:100%;
+      height:100%;
+      position:relative;
+      transform-style: preserve-3d;
+      border-radius: 22px;
+      box-shadow: 0 28px 90px rgba(0,0,0,.55);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      background: transparent;
+    }
+
+    /* Right page (inside message) */
+    .page-right{
+      position:relative;
+      transform: translateZ(1px);
+      background:
+        radial-gradient(600px 260px at 80% 10%, rgba(255,90,165,.18), transparent 60%),
+        linear-gradient(180deg, #fff, var(--paperA));
+      padding: 18px 18px 16px;
+      color: var(--ink);
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+
+    /* Left cover that opens */
+    .page-left{
+      position:relative;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      transform: translateZ(2px);
+      z-index:2;
+      will-change: transform;
+    }
+
+    .cover-front, .cover-back{
+      position:absolute;
+      inset:0;
+      backface-visibility:hidden;
+      transform-style: preserve-3d;
+    }
+
+    .cover-front{
+      background:
+        radial-gradient(900px 420px at 30% 20%, rgba(255,214,107,.35), transparent 60%),
+        linear-gradient(180deg, #fff, var(--paperB));
+      display:grid;
+      place-items:center;
+      color:#b2185b;
+      font-weight:1000;
+      letter-spacing:.6px;
+      text-align:center;
+      padding: 28px;
+    }
+    .cover-front h2{
+      margin:0;
+      font-size: clamp(22px, 3.0vw, 42px);
+      text-shadow: 0 10px 24px rgba(0,0,0,.10);
+    }
+
+    /* “Other side” text sits on the cover back */
+    .cover-back{
+      transform: rotateY(180deg);
+      background: linear-gradient(180deg, #fff, var(--paperA));
+      display:grid;
+      place-items:center;
+      padding: 28px;
+      color:#b2185b;
+      text-align:center;
+      font-weight:1000;
+      letter-spacing:.4px;
+    }
+    .cover-back h2{
+      margin:0;
+      font-size: clamp(22px, 3.0vw, 42px);
+    }
+
+    /* spine divider */
+    .spine{
+      position:absolute;
+      left:50%;
+      top:0;
+      width: 14px;
+      height:100%;
+      transform: translateX(-50%) translateZ(3px);
+      background: linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.12));
+      opacity:.6;
+      z-index:3;
+      pointer-events:none;
+    }
+
+    .inside-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .inside-header h3{
+      margin:0;
+      font-size: 14px;
+      letter-spacing:.2px;
+      color:#b2185b;
+      font-weight:1000;
+    }
+
+    .decor{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      opacity:.95;
+    }
+
+    .message{
+      flex:1;
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,.08);
+      background: rgba(255,255,255,.84);
+      padding: 16px 18px;
+      overflow:hidden; /* no scrolling */
+      white-space: pre-wrap;
+      line-height: 1.42;
+      font-size: clamp(10px, 1.05vw, 14px);
+      column-count: 2;
+      column-gap: 18px;
+    }
+
+    .sig{
+      margin-top: 6px;
+      opacity:.78;
+      font-size: 12px;
+      display:flex;
+      justify-content:flex-end;
+    }
+
+    /* Hover bob */
+    @keyframes hoverBob{
+      from{ transform: translate(-50%, -50%) translateY(0px); }
+      to{ transform: translate(-50%, -50%) translateY(-10px); }
+    }
+
+    /* Responsive: 1 column message for smaller screens */
+    @media (max-width: 860px){
+      .message{ column-count: 1; font-size: 12px; }
+      .card-book{ grid-template-columns: 1.1fr .9fr; }
+    }
+    @media (max-width: 760px){
+      .card-float{ height: min(620px, 76vh); }
+      .card-book{ grid-template-columns: 1fr; }
+      .page-left{ display:none; }
+      .spine{ display:none; }
+      .page-right{ border-radius: 22px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="stage">
+    <div class="camera" id="camera">
+      <div class="stars"></div>
+
+      <div class="clouds" id="clouds" aria-hidden="true">
+        <div class="cloud" style="left:8%; top:18%"></div>
+        <div class="cloud" style="left:42%; top:34%; width:min(660px, 86vw); opacity:.85"></div>
+        <div class="cloud" style="left:18%; top:58%; width:min(580px, 80vw); opacity:.90"></div>
+        <div class="cloud" style="left:56%; top:64%; width:min(580px, 80vw); opacity:.75"></div>
+      </div>
+
+      <div class="ground" id="ground" aria-hidden="true">
+        <div class="horizon-glow"></div>
+        <div class="ground-plane"></div>
+      </div>
+
+      <!-- Present -->
+      <div class="present-area" id="present" role="button" tabindex="0" aria-label="Open present">
+        <div class="present-shadow"></div>
+        <div class="beam" id="beam"></div>
+        <div class="lid" id="lid">
+          <div class="bow"><div class="knot"></div></div>
+        </div>
+        <div class="box"></div>
+        <div class="ribbon-vert"></div>
+        <div class="ribbon-horz"></div>
+      </div>
+
+      <div class="prompt" id="prompt">Please click to open 🎁</div>
+
+      <!-- Floating card (appears after opening present) -->
+      <div class="card-float" id="cardFloat" aria-hidden="true">
+        <div class="card-book" id="cardBook">
+          <div class="page-left" id="leftPage">
+            <div class="cover-front">
+              <div>
+                <h2>Merry Christmas, Britney :)</h2>
+              </div>
+            </div>
+            <div class="cover-back">
+              <div>
+                <h2>Merry Christmas, Britney :)</h2>
+              </div>
+            </div>
+          </div>
+
+          <div class="spine"></div>
+
+          <div class="page-right">
+            <svg class="decor" viewBox="0 0 1000 650" preserveAspectRatio="none" aria-hidden="true">
+              <g opacity=".95">
+                <g transform="translate(40,55)">
+                  <path d="M0 0 C20 -18, 40 -18, 58 0 C40 10, 20 10, 0 0Z" fill="var(--holly)"/>
+                  <path d="M8 18 C26 0, 48 4, 62 22 C40 30, 22 28, 8 18Z" fill="var(--holly)"/>
+                  <circle cx="40" cy="8" r="8" fill="var(--berry)"/>
+                  <circle cx="54" cy="18" r="6" fill="var(--berry)"/>
+                </g>
+                <g transform="translate(960,55) scale(-1,1)">
+                  <path d="M0 0 C20 -18, 40 -18, 58 0 C40 10, 20 10, 0 0Z" fill="var(--holly)"/>
+                  <path d="M8 18 C26 0, 48 4, 62 22 C40 30, 22 28, 8 18Z" fill="var(--holly)"/>
+                  <circle cx="40" cy="8" r="8" fill="var(--berry)"/>
+                  <circle cx="54" cy="18" r="6" fill="var(--berry)"/>
+                </g>
+              </g>
+              <g opacity=".22" fill="none" stroke="var(--gold)" stroke-width="2">
+                <path d="M120 140 l20 20 m0-20 l-20 20" />
+                <path d="M880 160 l22 22 m0-22 l-22 22" />
+                <path d="M160 520 l18 18 m0-18 l-18 18" />
+                <path d="M840 520 l18 18 m0-18 l-18 18" />
+              </g>
+            </svg>
+
+            <div class="inside-header">
+              <h3>💌 Message</h3>
+            </div>
+
+            <div class="message" id="message"></div>
+            <div class="sig">— nemo 🎁</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT = `lol bello!
+
+merry christmas :)
+
+thank you for being such a big part of my life and not even up for argument but you have been top 1 most important people for me this year (apart from my mom and dad). i know this year has been quite a ride for you emotionally and physically and it goes without doubt that you are doing amazing. i am proud of you and i hope you know that you are destined to do wonders :)
+
+i want to thank you for sticking by myside and being there for me, giving me hugs, being supportive, giving me such thoughtful gifts, cuddles!, making my 21st birthday literally unforgettable, and so much more. although its crazy to think we've literally gotten close and really known each other for about 9 months, so much has happened and no matter where the future takes us, i just want you to know with certainty that i will ALWAYS be rooting for you, ALWAYS be by your side, and ALWAYS have your back. you genuinely mean so much to me that words cannot express and i look forward to making a ton more goofy memories with you my little fineapple ;)
+
+i miss you and i cant wait to see you back in a little more than a week :D
+
+i hope you have a pleasant Christmas with mom and sis!
+
+sincerely,
+nemo`;
+
+    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
+    const camera = document.getElementById("camera");
+    const clouds = document.getElementById("clouds");
+    const ground = document.getElementById("ground");
+
+    const present = document.getElementById("present");
+    const lid = document.getElementById("lid");
+    const beam = document.getElementById("beam");
+    const prompt = document.getElementById("prompt");
+
+    const cardFloat = document.getElementById("cardFloat");
+    const leftPage = document.getElementById("leftPage");
+    const message = document.getElementById("message");
+
+    message.textContent = SCRIPT;
+
+    let clickable = false;
+    let opened = false;
+
+    function setInitial(){
+      gsap.set(camera, { scale: 1, x: 0, y: 0 });
+
+      // start above screen
+      gsap.set(present, { x: 0, y: -520, rotate: -18, scale: 0.75, transformOrigin: "50% 85%" });
+
+      gsap.set(clouds, { opacity: 0, y: 120 });
+      gsap.set(ground, { opacity: 0, y: 40 });
+
+      gsap.set(prompt, { opacity: 0, y: 10 });
+      gsap.set(beam, { opacity: 0, scaleY: 0.2 });
+
+      // card hidden
+      gsap.set(cardFloat, { opacity: 0, y: 40, scale: 0.86 });
+      cardFloat.setAttribute("aria-hidden", "true");
+
+      // card closed
+      gsap.set(leftPage, { rotateY: 0, transformOrigin: "0% 50%" });
+
+      present.style.pointerEvents = "none";
+      clickable = false;
+      opened = false;
+    }
+
+    function enableClick(){
+      clickable = true;
+      present.style.pointerEvents = "auto";
+      gsap.to(prompt, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" });
+    }
+
+    function playFallSequence(){
+      const tl = gsap.timeline();
+
+      // clouds fade in, drift upward (feels like falling through them)
+      tl.to(clouds, { opacity: 1, duration: 0.7, ease: "power2.out" }, 0);
+      tl.to(clouds, { y: -160, duration: 2.4, ease: "none" }, 0);
+
+      // ground comes in later
+      tl.to(ground, { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" }, 1.2);
+
+      // camera gentle zoom
+      tl.to(camera, { scale: 1.08, y: 10, duration: 2.2, ease: "sine.inOut" }, 0.2);
+
+      // present falling
+      tl.to(present, {
+        y: 140,
+        rotate: 320,
+        scale: 1.0,
+        duration: 2.1,
+        ease: "power2.in"
+      }, 0.1);
+
+      // bounce
+      tl.to(present, { y: 175, duration: 0.14, ease: "power2.in" })
+        .to(present, { y: 135, duration: 0.28, ease: "bounce.out" })
+        .fromTo(present, { scaleX: 1.08, scaleY: 0.92 }, { scaleX: 1, scaleY: 1, duration: 0.35, ease: "elastic.out(1,0.5)" }, "<");
+
+      // settle camera slightly
+      tl.to(camera, { scale: 1.04, y: 0, duration: 0.9, ease: "sine.inOut" }, "<+0.05");
+
+      // show prompt and enable click
+      tl.to(clouds, { opacity: 0.38, duration: 0.6, ease: "power2.out" }, "<+0.1");
+      tl.add(enableClick, "<+0.15");
+
+      return tl;
+    }
+
+    function openPresentAndRevealCard(){
+      if (!clickable || opened) return;
+      opened = true;
+      present.style.pointerEvents = "none";
+
+      const tl = gsap.timeline();
+
+      // hide prompt
+      tl.to(prompt, { opacity: 0, duration: 0.2, ease: "power2.out" }, 0);
+
+      // lid opens
+      tl.to(lid, { rotate: -42, y: -12, duration: 0.45, ease: "back.out(2.4)" }, 0.05)
+        .to(lid, { rotate: -35, duration: 0.22, ease: "sine.inOut" })
+        .to(lid, { rotate: -40, duration: 0.18, ease: "sine.inOut" })
+        .to(lid, { rotate: -35, duration: 0.18, ease: "sine.inOut" });
+
+      // pink light beam blasts out
+      tl.to(beam, { opacity: 1, scaleY: 1, duration: 0.25, ease: "power2.out" }, "<-0.15");
+      tl.to(beam, { opacity: 0.65, duration: 0.5, ease: "sine.inOut" }, "<");
+
+      // card pops up from present and hovers midair
+      tl.set(cardFloat, { pointerEvents: "none" }, "<");
+      tl.to(cardFloat, {
+        opacity: 1,
+        y: -10,
+        scale: 1.0,
+        duration: 0.55,
+        ease: "back.out(2.2)",
+        onStart: () => cardFloat.setAttribute("aria-hidden","false")
+      }, "<-0.05");
+
+      // float bob animation
+      tl.add(() => {
+        cardFloat.style.animation = "hoverBob 1.6s ease-in-out infinite alternate";
+      }, "<");
+
+      // automatically open the card (left cover swings open)
+      tl.to(leftPage, { rotateY: -160, duration: 0.95, ease: "power2.inOut" }, "+=0.15");
+
+      // beam fades
+      tl.to(beam, { opacity: 0, duration: 0.6, ease: "power2.out" }, "<");
+
+      return tl;
+    }
+
+    // Click / keyboard open
+    present.addEventListener("click", openPresentAndRevealCard);
+    present.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openPresentAndRevealCard();
+      }
+    });
+
+    // Boot
+    setInitial();
+
+    if (prefersReducedMotion){
+      gsap.set(clouds, { opacity: 0.38, y: 0 });
+      gsap.set(ground, { opacity: 1, y: 0 });
+      gsap.set(present, { y: 140, rotate: 0, scale: 1 });
+      enableClick();
+    } else {
+      playFallSequence();
+    }
+  </script>
+</body>
+</html>
